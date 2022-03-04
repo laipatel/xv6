@@ -89,3 +89,11 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+// CHANGE1
+
+int
+sys_getreadcount(void) 
+{
+	return myproc()->read;
+}
