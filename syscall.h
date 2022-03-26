@@ -21,3 +21,5 @@
 #define SYS_mkdir  		 		20
 #define SYS_close  		 		21
 #define SYS_getreadcount 	22 //CHANGE1
+#define SYS_settickets 		23 //CHANGE2
+#define SYS_getpinfo			24 //CHANGE3

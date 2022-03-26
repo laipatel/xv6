@@ -29,4 +29,6 @@ SYSCALL(getpid)
 SYSCALL(sbrk)
 SYSCALL(sleep)
 SYSCALL(uptime)
-SYSCALL(getreadcount)
+SYSCALL(getreadcount) //CHANGE1
+SYSCALL(settickets) 	//CHANGE2
+SYSCALL(getpinfo)			//CHANGE3

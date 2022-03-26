@@ -6,6 +6,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
+#include "pstat.h" //CHANGE4
 
 int
 sys_fork(void)
@@ -97,3 +98,34 @@ sys_getreadcount(void)
 {
 	return myproc()->read;
 }
+
+//CHANGE2
+
+int 
+sys_settickets(void)
+{
+  int number;
+  argint(0, &number);
+
+  if (number < 0)
+    return -1;
+  else if (number == 0)
+    return settickets(10);
+  else
+  {
+    return settickets(number);
+  }
+}
+
+//CHANGE3
+
+int 
+sys_getpinfo(void)
+{
+  struct pstat *ps;
+  if (argptr(0, (char **)&ps, sizeof(struct pstat)) < 0)
+    return -1;
+  getpinfo(ps);
+  return 0;
+}
+

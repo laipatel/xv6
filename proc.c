@@ -6,6 +6,8 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "rand.h"	 //CHANGE1
+#include "pstat.h" //CHANGE2
 
 struct {
   struct spinlock lock;
@@ -19,6 +21,47 @@ extern void forkret(void);
 extern void trapret(void);
 
 static void wakeup1(void *chan);
+
+
+//CHANGE5
+int
+settickets(int number)
+{
+  struct proc *pr = myproc();
+  int pid = pr->pid;
+  acquire(&ptable.lock);
+  struct proc *p;
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    if (p->pid == pid)
+    {
+      p->tickets = number;
+      release(&ptable.lock);
+      return 0;
+    }
+  }
+  release(&ptable.lock);
+  return 0;
+}
+
+//CHANGE6
+int
+getpinfo(struct pstat *ps)
+{
+  acquire(&ptable.lock);
+  struct proc *p;
+  int i = 0;
+  for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  {
+    ps->inuse[i] = p->state != UNUSED;
+    ps->tickets[i] = p->tickets;
+    ps->pid[i] = p->pid;
+    ps->ticks[i] = p->ticks;
+    i++;
+  }
+  release(&ptable.lock);
+  return 0;
+}
 
 void
 pinit(void)
@@ -88,6 +131,8 @@ allocproc(void)
 found:
   p->state = EMBRYO;
   p->pid = nextpid++;
+	p->tickets = 10; //CHANGE3
+	p->ticks = 0;		 //CHANGE4
 
   release(&ptable.lock);
 
@@ -319,6 +364,62 @@ wait(void)
 //  - swtch to start running that process
 //  - eventually that process transfers control
 //      via swtch back to the scheduler.
+
+void
+scheduler(void)
+{
+  struct proc *p;
+  struct cpu *c = mycpu();
+  c->proc = 0;
+  
+  for(;;){
+    // Enable interrupts on this processor.
+    sti();
+
+
+    // Loop over process table looking for process to run.
+    acquire(&ptable.lock);
+
+		//Find total tickets
+  	int total = 0;
+  	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  	{
+    	if (p->state == RUNNABLE)
+    	{
+      	total += p->tickets;
+    	}
+  	}
+		int winner = random_at_most(total);
+
+		//Loop through it again to find the winner
+		int curr = 0;
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->state == RUNNABLE)
+				curr += p->tickets;
+			if (curr > winner) {
+
+				// Switch to chosen process.  It is the process's job
+				// to release ptable.lock and then reacquire it
+				// before jumping back to us.
+				c->proc = p;
+				switchuvm(p);
+				p->state = RUNNING;
+				p->ticks++;
+				swtch(&(c->scheduler), p->context);
+				switchkvm();
+
+				// Process is done running for now.
+				// It should have changed its p->state before coming back.
+				c->proc = 0;
+				break;
+			}
+    }
+    release(&ptable.lock);
+
+  }
+}
+
+/*
 void
 scheduler(void)
 {
@@ -332,6 +433,17 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+
+  	int total = 0;
+  	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
+  	{
+    	if (p->state == RUNNABLE)
+    	{
+      	total += p->tickets;
+    	}
+  	}
+		int winner = random_at_most(total);
+
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
@@ -354,6 +466,7 @@ scheduler(void)
 
   }
 }
+*/
 
 // Enter scheduler.  Must hold only ptable.lock
 // and have changed proc->state. Saves and restores
