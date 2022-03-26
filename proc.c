@@ -434,16 +434,6 @@ scheduler(void)
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
 
-  	int total = 0;
-  	for (p = ptable.proc; p < &ptable.proc[NPROC]; p++)
-  	{
-    	if (p->state == RUNNABLE)
-    	{
-      	total += p->tickets;
-    	}
-  	}
-		int winner = random_at_most(total);
-
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->state != RUNNABLE)
         continue;
