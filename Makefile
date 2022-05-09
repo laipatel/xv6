@@ -186,6 +186,7 @@ UPROGS=\
 	_zombie\
 	_readcount\
 	_lotterytest\
+	_stacktester\
 
 # CHANGE1: added _readcount\ above
 # CHANGE2: added _lotterytest\ above
@@ -258,11 +259,11 @@ qemu-nox-gdb: fs.img xv6.img .gdbinit
 EXTRA=\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
 	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
-	printf.c readcount.c lotterytest.c umalloc.c\
+	printf.c readcount.c lotterytest.c stacktester.c umalloc.c\
 	README dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\
 
-# CHANGE2 added readcount.c
+#CHANGE4 added user program files here^
 
 dist:
 	rm -rf dist

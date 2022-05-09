@@ -52,6 +52,7 @@ struct proc {
 	int read;										 // Readcount CHANGE1
 	int tickets;								 // Tickets CHANGE2							 
 	int ticks;									 // Ticks CHANGE3															 
+	int pages;									 // Stack Pages CHANGE4
 };
 
 // Process memory is laid out contiguously, low addresses first:

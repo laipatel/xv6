@@ -78,6 +78,18 @@ trap(struct trapframe *tf)
     lapiceoi();
     break;
 
+	case T_PGFLT: ;
+    uint f = rcr2();
+    if (f >KERNBASE-1){
+	  exit();
+	}
+    f = PGROUNDDOWN(f);
+    if (allocuvm(myproc()->pgdir, f, f + PGSIZE) == 0) {
+      exit();
+    }
+    myproc()->pages++;
+    break;
+
   //PAGEBREAK: 13
   default:
     if(myproc() == 0 || (tf->cs&3) == 0){
